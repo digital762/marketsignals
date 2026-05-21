@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply bg-cream-100 text-ink antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+  body {
+    @apply font-sans;
+  }
+  h1, h2, h3, h4 {
+    @apply font-serif text-ink tracking-tightish;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-xl border border-cream-200 p-6;
+  }
+  .card-tight {
+    @apply bg-white rounded-xl border border-cream-200 p-5;
+  }
+  .eyebrow {
+    @apply uppercase text-[11px] tracking-[0.18em] text-ink-mute font-medium;
+  }
+  .stat-xl {
+    @apply font-serif text-[64px] leading-[1] tracking-tightish;
+  }
+  .stat-lg {
+    @apply font-serif text-[44px] leading-[1] tracking-tightish;
+  }
+  .stat-md {
+    @apply font-serif text-[28px] leading-[1.05] tracking-tightish;
+  }
+  .divider {
+    @apply h-px bg-cream-200 w-full;
+  }
+}
