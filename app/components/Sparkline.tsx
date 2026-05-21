@@ -12,7 +12,7 @@ export function Sparkline({
   data,
   width = 120,
   height = 32,
-  stroke = "#1A1A1A",
+  stroke = "#1F343F",
   fill = "none",
   showDot = true,
   className,

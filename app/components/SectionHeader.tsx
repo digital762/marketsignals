@@ -15,9 +15,9 @@ export function SectionHeader({
     <div className="flex items-end justify-between gap-6 mb-6">
       <div className="max-w-2xl">
         <div className="eyebrow mb-2">{eyebrow}</div>
-        <h2 className="text-[28px] font-semibold leading-tight">{title}</h2>
+        <h2 className="text-[28px] font-medium leading-tight text-slate">{title}</h2>
         {agentLens && (
-          <p className="mt-2 text-sm text-ink-soft leading-relaxed">{agentLens}</p>
+          <p className="mt-2 text-sm text-slate-soft leading-relaxed">{agentLens}</p>
         )}
       </div>
       {rightSlot && <div className="shrink-0">{rightSlot}</div>}

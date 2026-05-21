@@ -51,17 +51,17 @@ export function MiniStatGrid({ keywords, columns = 3 }: MiniStatGridProps) {
       {items.map((it) => {
         const accent = shapeAccent(it.shape);
         const sparkColor =
-          accent === "up" ? "#3E6B47" : accent === "down" ? "#B4422D" : "#1A1A1A";
+          accent === "up" ? "#2C537A" : accent === "down" ? "#9E6464" : "#1F343F";
         return (
           <div key={it.group} className="card-tight">
             <div className="flex items-center justify-between gap-3">
-              <div className="font-serif text-[18px] leading-tight">{it.group}</div>
+              <div className="font-serif text-[18px] leading-tight text-slate font-medium">{it.group}</div>
               <TrendBadge shape={it.shape} size="sm" />
             </div>
             <div className="mt-3 flex items-end justify-between gap-3">
               <div>
-                <div className="stat-md text-ink">{formatVolume(it.totalVolume)}</div>
-                <div className="text-[11px] text-ink-mute mt-0.5">searches / mo</div>
+                <div className="stat-md">{formatVolume(it.totalVolume)}</div>
+                <div className="text-[11px] text-slate-mute mt-0.5">searches / mo</div>
               </div>
               <Sparkline
                 data={it.trend}
@@ -72,7 +72,7 @@ export function MiniStatGrid({ keywords, columns = 3 }: MiniStatGridProps) {
               />
             </div>
             {it.top && (
-              <div className="mt-3 pt-3 border-t border-cream-200 text-[11px] text-ink-faint truncate">
+              <div className="mt-3 pt-3 border-t border-mist-200 text-[11px] text-slate-faint truncate">
                 top: {it.top.phrase}
               </div>
             )}

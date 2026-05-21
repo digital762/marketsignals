@@ -2,22 +2,14 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Market Signals · Dubai & UAE",
+  title: "Market Signals · betterhomes",
   description:
-    "Buyer demand intelligence for UAE real estate agents. Search volumes, price-sensitivity trends, area momentum, and buyer profile signals — sourced from Semrush.",
+    "UAE buyer-demand intelligence for betterhomes agents. Search volumes, price-sensitivity trends, area momentum, and buyer profile signals — sourced from Semrush.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
       <body>{children}</body>
     </html>
   );

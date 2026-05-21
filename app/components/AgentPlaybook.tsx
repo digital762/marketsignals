@@ -29,7 +29,6 @@ function build(
 ): TalkingPoint[] {
   const out: TalkingPoint[] = [];
 
-  // 1. Price-drop narrative
   const best = maxMoMInBasket(priceSensitive);
   if (best) {
     out.push({
@@ -51,7 +50,6 @@ function build(
     });
   }
 
-  // 2. High-volume transactional anchor
   const topBuy = [...transactional].sort((a, b) => b.volume - a.volume)[0];
   if (topBuy) {
     const shape = trendShape(topBuy.trend);
@@ -71,7 +69,6 @@ function build(
     });
   }
 
-  // 3. Mortgage / financing posture
   const mortgageKeywords = mortgageGroup.filter((k) =>
     k.group?.toLowerCase().includes("mortgage"),
   );
@@ -117,43 +114,43 @@ export function AgentPlaybook({
       {points.map((p, i) => (
         <div key={i} className="card flex flex-col gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-cream-100 text-ink flex items-center justify-center text-xs font-semibold">
+            <div className="w-7 h-7 rounded-full bg-mist-100 text-slate flex items-center justify-center text-xs font-semibold">
               {i + 1}
             </div>
-            <div className="text-xs text-ink-mute font-medium uppercase tracking-wider">
+            <div className="text-xs text-slate-mute font-semibold uppercase tracking-wider">
               Scenario
             </div>
           </div>
           <div>
-            <div className="font-serif text-[18px] leading-snug text-ink">
+            <div className="font-serif text-[18px] leading-snug text-slate font-medium">
               {p.scenario}
             </div>
           </div>
 
           <div className="flex-1 space-y-3">
             <div className="text-sm">
-              <div className="text-[11px] uppercase tracking-wider text-ink-faint mb-1">
+              <div className="text-[11px] uppercase tracking-wider text-slate-faint mb-1 font-semibold">
                 Customer says
               </div>
-              <div className="text-ink-soft italic leading-relaxed">
+              <div className="text-slate-soft italic leading-relaxed">
                 &ldquo;{p.customerSays}&rdquo;
               </div>
             </div>
 
             <div className="text-sm">
-              <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-gold-dark mb-1">
+              <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-denim mb-1 font-semibold">
                 <MessageSquareQuote size={12} strokeWidth={2.25} />
                 Agent responds
               </div>
-              <div className="text-ink leading-relaxed">{p.agentResponds}</div>
+              <div className="text-slate leading-relaxed">{p.agentResponds}</div>
             </div>
           </div>
 
-          <div className="pt-3 border-t border-cream-200">
-            <div className="text-[11px] uppercase tracking-wider text-ink-faint mb-1">
+          <div className="pt-3 border-t border-mist-200">
+            <div className="text-[11px] uppercase tracking-wider text-slate-faint mb-1 font-semibold">
               Backed by
             </div>
-            <div className="text-[12px] font-medium text-ink-soft">{p.proof}</div>
+            <div className="text-[12px] font-medium text-slate-soft">{p.proof}</div>
           </div>
         </div>
       ))}

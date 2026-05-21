@@ -114,17 +114,30 @@ export default function Page() {
       </section>
 
       {/* Footer */}
-      <footer className="mt-20 pt-8 border-t border-cream-200 text-xs text-ink-faint flex flex-wrap gap-x-8 gap-y-2">
-        <div>
-          <span className="text-ink-mute">Source · </span>
-          {DATA_SOURCE}
+      <footer className="mt-20 pt-8 border-t border-mist-200">
+        <div className="flex flex-wrap items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <span className="font-serif text-[18px] leading-none text-slate font-medium tracking-tight">
+              betterhomes
+            </span>
+            <span className="h-3 w-px bg-mist-300" />
+            <span className="text-[10px] uppercase tracking-[0.18em] text-slate-mute font-semibold">
+              Est <span className="text-slate-faint">1986</span>
+            </span>
+          </div>
+          <div className="text-xs text-slate-faint flex flex-wrap gap-x-6 gap-y-1">
+            <div>
+              <span className="text-slate-mute">Source · </span>
+              {DATA_SOURCE}
+            </div>
+            <div>
+              <span className="text-slate-mute">Refreshed · </span>
+              {DATA_REFRESHED_AT}
+            </div>
+          </div>
         </div>
-        <div>
-          <span className="text-ink-mute">Refreshed · </span>
-          {DATA_REFRESHED_AT}
-        </div>
-        <div>
-          <span className="text-ink-mute">Method · </span>
+        <div className="mt-4 text-[11px] text-slate-faint max-w-3xl">
+          <span className="text-slate-mute font-semibold">Method · </span>
           Trends are 12-month normalized series. Each value is a month, peak = 1.00.
           Recent vs prior compares the last 3 months to the previous 3.
         </div>

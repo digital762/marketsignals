@@ -15,7 +15,7 @@ export function TrendBadge({ shape, size = "sm", pct }: TrendBadgeProps) {
       ? "text-signal-up bg-signal-up/10"
       : accent === "down"
         ? "text-signal-down bg-signal-down/10"
-        : "text-ink-mute bg-cream-200/50";
+        : "text-slate-mute bg-mist-200/60";
 
   const Icon =
     accent === "up" ? ArrowUpRight : accent === "down" ? ArrowDownRight : Minus;

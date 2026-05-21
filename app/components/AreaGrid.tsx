@@ -25,7 +25,6 @@ interface AreaSummary {
 
 function summarise(keywords: Keyword[]): AreaSummary {
   const totalVolume = keywords.reduce((s, k) => s + k.volume, 0);
-  // Volume-weighted trend across the group's keywords
   const length = keywords[0]?.trend.length ?? 12;
   const trend = Array.from({ length }, (_, i) => {
     let num = 0;
@@ -60,13 +59,13 @@ export function AreaGrid({ keywords }: AreaGridProps) {
       {areas.map((a) => {
         const accent = shapeAccent(a.shape);
         const sparkColor =
-          accent === "up" ? "#3E6B47" : accent === "down" ? "#B4422D" : "#1A1A1A";
+          accent === "up" ? "#2C537A" : accent === "down" ? "#9E6464" : "#1F343F";
         return (
           <div key={a.group} className="card-tight">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="font-serif text-[22px] leading-tight">{a.group}</div>
-                <div className="text-[11px] text-ink-faint mt-0.5 truncate max-w-[200px]">
+                <div className="font-serif text-[22px] leading-tight text-slate font-medium">{a.group}</div>
+                <div className="text-[11px] text-slate-faint mt-0.5 truncate max-w-[200px]">
                   top: {a.topPhrase}
                 </div>
               </div>
@@ -74,8 +73,8 @@ export function AreaGrid({ keywords }: AreaGridProps) {
             </div>
             <div className="mt-4 flex items-end justify-between">
               <div>
-                <div className="stat-md text-ink">{formatVolume(a.totalVolume)}</div>
-                <div className="text-[11px] text-ink-mute mt-0.5">
+                <div className="stat-md">{formatVolume(a.totalVolume)}</div>
+                <div className="text-[11px] text-slate-mute mt-0.5">
                   searches / mo
                 </div>
               </div>
@@ -87,15 +86,15 @@ export function AreaGrid({ keywords }: AreaGridProps) {
                 fill={sparkColor}
               />
             </div>
-            <div className="mt-3 pt-3 border-t border-cream-200 flex items-center justify-between text-xs">
-              <span className="text-ink-mute">Recent vs prior 3 mo</span>
+            <div className="mt-3 pt-3 border-t border-mist-200 flex items-center justify-between text-xs">
+              <span className="text-slate-mute">Recent vs prior 3 mo</span>
               <span
                 className={`tabular-nums font-medium ${
                   a.qoq > 0.05
                     ? "text-signal-up"
                     : a.qoq < -0.05
                       ? "text-signal-down"
-                      : "text-ink-mute"
+                      : "text-slate-mute"
                 }`}
               >
                 {formatPct(a.qoq, { signed: true })}

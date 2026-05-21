@@ -64,8 +64,8 @@ export function KeywordTable({ keywords, filters }: KeywordTableProps) {
             onClick={() => setActiveFilter("all")}
             className={`text-xs px-3 py-1.5 rounded-full transition-colors ${
               activeFilter === "all"
-                ? "bg-ink text-cream-50"
-                : "bg-cream-100 text-ink-soft hover:bg-cream-200"
+                ? "bg-slate text-mist-50"
+                : "bg-mist-100 text-slate-soft hover:bg-mist-200"
             }`}
           >
             All
@@ -77,8 +77,8 @@ export function KeywordTable({ keywords, filters }: KeywordTableProps) {
               onClick={() => setActiveFilter(f.label)}
               className={`text-xs px-3 py-1.5 rounded-full transition-colors ${
                 activeFilter === f.label
-                  ? "bg-ink text-cream-50"
-                  : "bg-cream-100 text-ink-soft hover:bg-cream-200"
+                  ? "bg-slate text-mist-50"
+                  : "bg-mist-100 text-slate-soft hover:bg-mist-200"
               }`}
             >
               {f.label}
@@ -90,29 +90,29 @@ export function KeywordTable({ keywords, filters }: KeywordTableProps) {
       <div className="overflow-x-auto -mx-2">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-[11px] uppercase tracking-[0.14em] text-ink-mute">
+            <tr className="text-left text-[11px] uppercase tracking-[0.14em] text-slate-mute">
               <th
-                className="font-medium pb-3 pl-2 cursor-pointer select-none"
+                className="font-semibold pb-3 pl-2 cursor-pointer select-none"
                 onClick={() => toggleSort("phrase")}
               >
                 Keyword
               </th>
               <th
-                className="font-medium pb-3 cursor-pointer select-none text-right"
+                className="font-semibold pb-3 cursor-pointer select-none text-right"
                 onClick={() => toggleSort("volume")}
               >
                 Vol/mo
               </th>
-              <th className="font-medium pb-3">12-mo trend</th>
+              <th className="font-semibold pb-3">12-mo trend</th>
               <th
-                className="font-medium pb-3 cursor-pointer select-none text-right"
+                className="font-semibold pb-3 cursor-pointer select-none text-right"
                 onClick={() => toggleSort("qoq")}
               >
                 Recent vs prior
               </th>
-              <th className="font-medium pb-3">Shape</th>
+              <th className="font-semibold pb-3">Shape</th>
               <th
-                className="font-medium pb-3 cursor-pointer select-none text-right pr-2"
+                className="font-semibold pb-3 cursor-pointer select-none text-right pr-2"
                 onClick={() => toggleSort("cpc")}
               >
                 CPC
@@ -124,22 +124,22 @@ export function KeywordTable({ keywords, filters }: KeywordTableProps) {
               const accent = shapeAccent(shape);
               const sparkColor =
                 accent === "up"
-                  ? "#3E6B47"
+                  ? "#2C537A"
                   : accent === "down"
-                    ? "#B4422D"
-                    : "#1A1A1A";
+                    ? "#9E6464"
+                    : "#1F343F";
               return (
                 <tr
                   key={k.phrase}
-                  className="border-t border-cream-200 hover:bg-cream-50/60"
+                  className="border-t border-mist-200 hover:bg-mist-50"
                 >
                   <td className="py-3 pl-2 pr-3">
-                    <div className="font-medium text-ink">{k.phrase}</div>
+                    <div className="font-medium text-slate">{k.phrase}</div>
                     {k.group && k.category !== "area-dubai" && k.category !== "area-uae" && (
-                      <div className="text-[11px] text-ink-faint mt-0.5">{k.group}</div>
+                      <div className="text-[11px] text-slate-faint mt-0.5">{k.group}</div>
                     )}
                   </td>
-                  <td className="py-3 text-right font-medium text-ink tabular-nums">
+                  <td className="py-3 text-right font-medium text-slate tabular-nums">
                     {formatVolume(k.volume)}
                   </td>
                   <td className="py-3">
@@ -158,7 +158,7 @@ export function KeywordTable({ keywords, filters }: KeywordTableProps) {
                           ? "text-signal-up font-medium"
                           : qoq < -0.05
                             ? "text-signal-down font-medium"
-                            : "text-ink-mute"
+                            : "text-slate-mute"
                       }
                     >
                       {formatPct(qoq, { signed: true })}
@@ -167,7 +167,7 @@ export function KeywordTable({ keywords, filters }: KeywordTableProps) {
                   <td className="py-3">
                     <TrendBadge shape={shape} />
                   </td>
-                  <td className="py-3 text-right pr-2 tabular-nums text-ink-soft">
+                  <td className="py-3 text-right pr-2 tabular-nums text-slate-soft">
                     {k.cpc > 0 ? `$${k.cpc.toFixed(2)}` : "—"}
                   </td>
                 </tr>
@@ -176,9 +176,9 @@ export function KeywordTable({ keywords, filters }: KeywordTableProps) {
           </tbody>
         </table>
       </div>
-      <div className="mt-3 text-[11px] text-ink-faint">
+      <div className="mt-3 text-[11px] text-slate-faint">
         Recent vs prior = avg of last 3 months ÷ avg of prior 3 months. CPC is
-        Google's average paid-search cost in USD — a proxy for advertiser
+        Google&rsquo;s average paid-search cost in USD — a proxy for advertiser
         willingness to chase the keyword.
       </div>
     </div>
