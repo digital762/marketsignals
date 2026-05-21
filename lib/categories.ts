@@ -1,57 +1,51 @@
-import type { CategoryMeta } from "./types";
+import type { ProfileMeta, SignalProfile } from "./types";
 
-export const CATEGORIES: CategoryMeta[] = [
+export const PROFILES: ProfileMeta[] = [
   {
-    id: "price-sensitive",
-    title: "Price-sensitivity demand",
-    shortTitle: "Price-sensitive",
-    agentLens:
-      "How loudly the market is asking about discounts, crashes, and below-market deals. Lead with these to validate a buyer's price hesitation, then anchor on inventory.",
+    id: "renter",
+    label: "Renter",
+    whatThisMeans:
+      "How many people in UAE are searching to rent right now — by unit type, area, and price. Use this when a customer is comparing rental options or weighing rent vs buy.",
+    headlinePhrase: "apartments for rent dubai",
   },
   {
-    id: "transactional",
-    title: "Active buy intent",
-    shortTitle: "Buy intent",
-    agentLens:
-      "Buyers in 'I am ready to purchase' mode. Volume here is the size of the live pipeline you are competing for.",
+    id: "landlord",
+    label: "Landlord",
+    whatThisMeans:
+      "Demand from owners who want to rent their property out — yields, property managers, tenant search. Use this when you're talking to a landlord client.",
+    headlinePhrase: "property management dubai",
   },
   {
-    id: "off-plan",
-    title: "Off-plan vs ready",
-    shortTitle: "Off-plan",
-    agentLens:
-      "Whether the market is leaning toward off-plan (developer-led) or ready (resale) inventory. Re-orient your pitch to match the dominant intent.",
+    id: "seller",
+    label: "Seller",
+    whatThisMeans:
+      "What owners are searching when they think about selling — valuations and how-to questions. Lean on this in a listing conversation.",
+    headlinePhrase: "dubai property valuation",
   },
   {
-    id: "property-type",
-    title: "Property type & size",
-    shortTitle: "Type & size",
-    agentLens:
-      "Which unit configurations are pulling the most search demand right now. Use to prioritise stock and shape positioning.",
+    id: "buyer",
+    label: "Buyer",
+    whatThisMeans:
+      "Live buyer demand — total searches, the areas they want, price-sensitivity signals, and mortgage interest. This is the headline view for sales conversations.",
+    headlinePhrase: "apartments for sale dubai",
   },
   {
-    id: "buyer-profile",
-    title: "Buyer profile signals",
-    shortTitle: "Buyer profile",
-    agentLens:
-      "Financing posture, foreign-buyer activity, and visa-linked intent. Tells you who is searching and what they actually need help with.",
-  },
-  {
-    id: "area-dubai",
-    title: "Dubai community demand",
-    shortTitle: "Dubai areas",
-    agentLens:
-      "Which Dubai communities are gaining or losing buyer attention. Match your conversation to where the demand is moving.",
-  },
-  {
-    id: "area-uae",
-    title: "UAE wider market",
-    shortTitle: "UAE wider",
-    agentLens:
-      "Demand outside Dubai — Sharjah, Abu Dhabi, Ajman. Useful when a customer is price-comparing across emirates.",
+    id: "investor",
+    label: "Investor",
+    whatThisMeans:
+      "Off-plan and yield-driven searches — investors looking at developers, communities, and ROI. Use this with an investor client weighing new launches.",
+    headlinePhrase: "off plan dubai",
   },
 ];
 
-export const CATEGORY_BY_ID = Object.fromEntries(
-  CATEGORIES.map((c) => [c.id, c]),
-) as Record<CategoryMeta["id"], CategoryMeta>;
+export const PROFILE_BY_ID = Object.fromEntries(
+  PROFILES.map((p) => [p.id, p]),
+) as Record<SignalProfile, ProfileMeta>;
+
+export const PROFILE_ORDER: SignalProfile[] = [
+  "renter",
+  "landlord",
+  "seller",
+  "buyer",
+  "investor",
+];
