@@ -22,6 +22,55 @@ export const DATA_REFRESHED_AT = "2026-05-21";
 export const DATA_SOURCE = "Semrush · Google.ae (UAE)";
 export const DATA_SOURCE_SHORT = "Semrush UAE";
 
+/**
+ * Phrases that make up the "below-market / price-drop" basket — used by the
+ * price-drop hero, calendar comparison band, and buyer-demand table.
+ */
+export const PRICE_DROP_PHRASES: string[] = [
+  "cheap property dubai",
+  "distressed property dubai",
+  "below market price",
+  "dubai property crash",
+];
+
+/**
+ * Curated buyer-demand table for the Overview tab — the keywords that actually
+ * help in a live customer conversation. Excludes generic / fringe terms.
+ */
+export const BUYER_DEMAND_PHRASES: string[] = [
+  "distressed property dubai",
+  "dubai property crash",
+  "buy property dubai",
+  "apartments for sale dubai",
+  "cheap property dubai",
+  "dubai mortgage rates",
+  "villas for sale dubai",
+];
+
+/**
+ * Top Dubai community area groups — for the geographic heat grid.
+ */
+export const DUBAI_AREA_GROUPS: string[] = [
+  "Dubai Hills",
+  "MBR City",
+  "Damac Hills 2",
+  "Dubai Marina",
+  "Dubai South",
+  "Downtown Dubai",
+];
+
+/**
+ * Buyer-demand types: studio, 1BR, 2BR, townhouse, villa. Used by the
+ * property-type strip on Overview.
+ */
+export const PROPERTY_TYPE_PHRASES: string[] = [
+  "studio for sale dubai",
+  "1 bedroom apartment dubai",
+  "2 bedroom apartment dubai",
+  "townhouse for sale dubai",
+  "villas for sale dubai",
+];
+
 export const KEYWORDS: Keyword[] = [
   // ── Renter ─────────────────────────────────────────────────────────────
   {

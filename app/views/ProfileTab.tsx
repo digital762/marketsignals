@@ -44,7 +44,7 @@ export function ProfileTab({ profile, keywords }: ProfileTabProps) {
             <div className="text-[11px] uppercase tracking-[0.16em] text-slate-mute font-semibold mb-3">
               Headline keyword · &ldquo;{headline.phrase}&rdquo;
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {headlineComps.map((c) => (
                 <PeriodComparisonCard
                   key={c.id}

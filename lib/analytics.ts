@@ -34,13 +34,51 @@ export function monthlyVolumes24(k: Keyword): number[] {
   return [...snapshotToMonthly(k.s2025), ...snapshotToMonthly(k.s2026)];
 }
 
-const PERIOD_INDICES: Record<PeriodId, { prior: number[]; current: number[]; label: string }> = {
-  "jan-feb":  { prior: [7, 8],   current: [19, 20], label: "Jan-Feb" },
-  "mar-apr":  { prior: [9, 10],  current: [21, 22], label: "Mar-Apr" },
-  "may":      { prior: [11],     current: [23],     label: "May" },
+interface ComparisonConfig {
+  prior: number[];
+  current: number[];
+  /** Short label used in tight contexts (chip text, column header). */
+  label: string;
+  /** Full label used in headlines and the calendar card eyebrow. */
+  longLabel: string;
+  /** Plain-English caption naming exactly what's compared. */
+  caption: string;
+  /** Whether this is a YoY (vs prior year) or MoM (vs prior month) comparison. */
+  kind: "yoy" | "mom";
+}
+
+const PERIOD_INDICES: Record<PeriodId, ComparisonConfig> = {
+  "jan-feb": {
+    prior: [7, 8], current: [19, 20],
+    label: "Jan-Feb YoY", longLabel: "Bi-monthly YoY · Jan-Feb",
+    caption: "Comparing Jan-Feb 2026 to Jan-Feb 2025",
+    kind: "yoy",
+  },
+  "mar-apr": {
+    prior: [9, 10], current: [21, 22],
+    label: "Mar-Apr YoY", longLabel: "Bi-monthly YoY · Mar-Apr",
+    caption: "Comparing Mar-Apr 2026 to Mar-Apr 2025",
+    kind: "yoy",
+  },
+  "may": {
+    prior: [11], current: [23],
+    label: "May YoY", longLabel: "Single-month YoY · May",
+    caption: "Comparing May 2026 to May 2025",
+    kind: "yoy",
+  },
+  "mom": {
+    prior: [22], current: [23],
+    label: "Month-on-month", longLabel: "Month-on-month",
+    caption: "Comparing May 2026 to April 2026",
+    kind: "mom",
+  },
 };
 
-export const PERIOD_IDS: PeriodId[] = ["jan-feb", "mar-apr", "may"];
+export const PERIOD_IDS: PeriodId[] = ["jan-feb", "mar-apr", "may", "mom"];
+
+export function comparisonConfig(id: PeriodId): ComparisonConfig {
+  return PERIOD_INDICES[id];
+}
 
 export function periodComparison(k: Keyword, id: PeriodId): PeriodComparison {
   const series = monthlyVolumes24(k);
@@ -48,12 +86,7 @@ export function periodComparison(k: Keyword, id: PeriodId): PeriodComparison {
   const priorAvg = Math.round(avg(cfg.prior.map((i) => series[i])));
   const currentAvg = Math.round(avg(cfg.current.map((i) => series[i])));
   const changePct = priorAvg === 0 ? (currentAvg > 0 ? 1 : 0) : (currentAvg - priorAvg) / priorAvg;
-  const direction = changePct > 0.02 ? "up" : changePct < -0.02 ? "down" : "flat";
-  const verb = direction === "up" ? "up" : direction === "down" ? "down" : "flat";
-  const sentence =
-    id === "may"
-      ? `May 2025: ${priorAvg.toLocaleString()} · May 2026: ${currentAvg.toLocaleString()} — ${formatPct(changePct, { signed: true })}`
-      : `${cfg.label} 2025: ${priorAvg.toLocaleString()} → ${cfg.label} 2026: ${currentAvg.toLocaleString()} — ${formatPct(changePct, { signed: true })} ${verb}`;
+  const sentence = `${cfg.caption}: ${priorAvg.toLocaleString()} → ${currentAvg.toLocaleString()} (${formatPct(changePct, { signed: true })})`;
   return { id, label: cfg.label, priorAvg, currentAvg, changePct, sentence };
 }
 
@@ -76,11 +109,47 @@ export function basketPeriodComparison(ks: Keyword[], id: PeriodId): PeriodCompa
   const priorAvg = Math.round(priorSum);
   const currentAvg = Math.round(currentSum);
   const changePct = priorAvg === 0 ? (currentAvg > 0 ? 1 : 0) : (currentAvg - priorAvg) / priorAvg;
-  const sentence =
-    id === "may"
-      ? `May 2025: ${priorAvg.toLocaleString()} · May 2026: ${currentAvg.toLocaleString()} — ${formatPct(changePct, { signed: true })}`
-      : `${cfg.label} 2025: ${priorAvg.toLocaleString()} → ${cfg.label} 2026: ${currentAvg.toLocaleString()} — ${formatPct(changePct, { signed: true })}`;
+  const sentence = `${cfg.caption}: ${priorAvg.toLocaleString()} → ${currentAvg.toLocaleString()} (${formatPct(changePct, { signed: true })})`;
   return { id, label: cfg.label, priorAvg, currentAvg, changePct, sentence };
+}
+
+/**
+ * Classify the overall 24-month series into a broker-readable shape.
+ * Used by the trend-label badge that appears alongside each percentage.
+ */
+export function trendShape24(series24: number[]): import("./types").TrendShape {
+  if (series24.length < 12) return "steady";
+  const recent6 = avg(series24.slice(-6));
+  const prior6 = avg(series24.slice(-12, -6));
+  const earliest = avg(series24.slice(0, 6));
+  const last = series24.at(-1) ?? 0;
+  const peak = Math.max(...series24);
+  const m = avg(series24);
+  const sd = Math.sqrt(avg(series24.map((v) => (v - m) ** 2)));
+  const cv = m > 0 ? sd / m : 0;
+  const recentIsPeak = last >= peak * 0.9;
+
+  if (recentIsPeak && recent6 > prior6 * 1.4) return "surging";
+  if (recent6 > prior6 * 1.15) return "rising";
+  if (prior6 > recent6 * 1.15 && earliest > recent6 * 1.1) return "cooling";
+  if (cv > 0.55) return "volatile";
+  return "steady";
+}
+
+/** Shape applied to a single keyword's 24-month series. */
+export function trendShapeOf(k: Keyword): import("./types").TrendShape {
+  return trendShape24(monthlyVolumes24(k));
+}
+
+/** Volume-weighted aggregate series across a basket — for shape on aggregated views. */
+export function basketSeries24(ks: Keyword[]): number[] {
+  if (!ks.length) return new Array(24).fill(0);
+  const result = new Array(24).fill(0);
+  for (const k of ks) {
+    const series = monthlyVolumes24(k);
+    for (let i = 0; i < 24; i++) result[i] += series[i];
+  }
+  return result;
 }
 
 /** Average monthly searches across the last 3 months. Used as "right now" headline volume. */
@@ -137,6 +206,31 @@ export function directionColor(d: Direction): string {
   if (d === "up") return "#2C537A";    // brand denim
   if (d === "down") return "#9E6464";  // terracotta
   return "#6B7F89";                    // slate-mute
+}
+
+export function shapeLabel(s: import("./types").TrendShape): string {
+  switch (s) {
+    case "surging": return "Surging";
+    case "rising": return "Rising";
+    case "cooling": return "Cooling";
+    case "volatile": return "Volatile";
+    case "steady": return "Steady";
+  }
+}
+
+/** Salmon for surging (urgency / standout), denim/terracotta otherwise. */
+export function shapeAccent(s: import("./types").TrendShape): "up" | "down" | "flat" | "salmon" {
+  if (s === "surging") return "salmon";
+  if (s === "rising") return "up";
+  if (s === "cooling") return "down";
+  return "flat";
+}
+
+export function shapeColor(s: import("./types").TrendShape): string {
+  if (s === "surging") return "#FF787A";
+  if (s === "rising") return "#2C537A";
+  if (s === "cooling") return "#9E6464";
+  return "#6B7F89";
 }
 
 /** Pick the single biggest YoY mover from a basket — for hero call-outs. */

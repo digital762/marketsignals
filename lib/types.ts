@@ -20,7 +20,11 @@ export interface Keyword {
   s2025: KeywordSnapshot;
 }
 
-export type PeriodId = "jan-feb" | "mar-apr" | "may";
+export type PeriodId = "jan-feb" | "mar-apr" | "may" | "mom";
+
+export type ComparisonId = PeriodId;
+
+export type TrendShape = "surging" | "rising" | "cooling" | "volatile" | "steady";
 
 export interface PeriodComparison {
   id: PeriodId;
