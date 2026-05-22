@@ -10,8 +10,8 @@ interface SparklineProps {
 
 export function Sparkline({
   data,
-  width = 120,
-  height = 32,
+  width = 130,
+  height = 28,
   stroke = "#1F343F",
   fill = "none",
   showDot = true,
@@ -53,7 +53,7 @@ export function Sparkline({
       role="img"
       aria-label="trend"
     >
-      {area && <path d={area} fill={fill} stroke="none" opacity={0.18} />}
+      {area && <path d={area} fill={fill} stroke="none" opacity={0.16} />}
       <path d={d} fill="none" stroke={stroke} strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round" />
       {showDot && (
         <circle cx={lastPoint[0]} cy={lastPoint[1]} r={2.5} fill={stroke} />

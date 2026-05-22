@@ -1,13 +1,13 @@
-# Market Signals — Agent Dashboard
+# Market Signals — Broker Dashboard
 
-Live UAE buyer-demand intelligence for bhomes agents. Pulls keyword search-volume
-and 12-month trend data from Semrush (Google.ae) and presents it in a scannable
-agent-facing layout with auto-generated talking points.
+Live UAE buyer-demand intelligence for betterhomes brokers. Pulls Google
+search-demand from Semrush across five customer profiles and presents
+year-on-year comparisons in broker-language.
 
 ## Stack
-- Next.js 14 (App Router) + TypeScript
-- Tailwind CSS
-- Lucide icons, custom SVG sparklines
+- Next.js 14 (App Router) + TypeScript + Tailwind
+- Lucide icons
+- Semrush MCP / Semrush API (Google.ae database)
 
 ## Local dev
 
@@ -16,45 +16,59 @@ npm install
 npm run dev
 ```
 
-Open <http://localhost:3000>.
+Open <http://localhost:3000>. Tabs deep-link via URL hash:
+`/#renter`, `/#landlord`, `/#seller`, `/#buyer`, `/#investor`.
 
 ## Refreshing data
-
-The dashboard reads from `lib/data/keywords.ts` — a committed snapshot of
-Semrush data. To refresh:
 
 ```bash
 SEMRUSH_API_KEY=xxxx npm run refresh-data
 ```
 
-This calls Semrush's `phrase_these` report for all seeds defined in
-`scripts/refresh-data.ts` and rewrites the data file. Add or remove keywords
-in `SEEDS` to grow the dataset.
+The script makes **two** `phrase_these` calls per seed (display_date
+`20260515` and `20250515`) to assemble a 24-month series — that's what
+powers the Jan-Feb 2025 vs 2026 / Mar-Apr 25 vs 26 / May this-year
+comparisons. It also runs `phrase_all` on four buyer/investor anchor
+keywords to compute the foreign-buyer country breakdown.
 
-Until the Semrush API key is wired up, the included snapshot is from 2026-05-21
-and can be updated by editing `lib/data/keywords.ts` directly with new CSV
-exports from the Semrush UI.
+Edit `SEEDS` in `scripts/refresh-data.ts` to add or retag keywords.
+
+## How the YoY math works
+
+Semrush returns `Nq` (average monthly searches) plus a 12-value
+normalized trend (`Td`) ending at `display_date`. We convert each
+snapshot's normalized values to absolute monthly volumes via
+`Nq × Td[i] / mean(Td)`, then concatenate the two snapshots into a
+24-month array (Jun 2024 → May 2026). Period averages are derived from
+fixed index slices — see `lib/analytics.ts`.
 
 ## Project layout
 
 ```
 app/
-  layout.tsx          Root layout + fonts
-  page.tsx            Single-page dashboard
-  components/         Section components (server unless marked client)
-  globals.css         Tailwind layer + tokens
+  layout.tsx                Root layout
+  page.tsx                  Client tab router (URL hash → view)
+  components/               UI primitives + section components
+  views/
+    OverviewTab.tsx         Default tab — cross-profile view
+    ProfileTab.tsx          Generic per-profile renderer
+  globals.css               Tailwind + brand layer
 lib/
-  types.ts            Shared types
-  categories.ts       Section metadata + agent lens copy
-  analytics.ts        Pure functions: MoM, QoQ, peak, trend shape
-  data/keywords.ts    Semrush snapshot
+  types.ts                  Keyword, snapshots, period comparisons
+  categories.ts             Profile metadata + broker-language copy
+  analytics.ts              YoY math, period averaging, formatters
+  data/
+    keywords.ts             Two-snapshot Semrush dataset
+    countries.ts            Foreign-buyer country breakdown
 scripts/
-  refresh-data.ts     Pull from Semrush API, rewrite snapshot
-tailwind.config.ts    Brand tokens
+  refresh-data.ts           Live refresh from Semrush
+tailwind.config.ts          betterhomes brand tokens
 ```
 
-## Brand tokens
+## Brand
 
-Defined in `tailwind.config.ts`. Cream/ink/gold/signal palettes match the
-presentation deck aesthetic. Swap the tokens to align with the formal brand
-guidelines once provided.
+Tokens in `tailwind.config.ts` follow betterhomes 2025 brand guidelines
+— Slate blue / Denim / Powder / Sand / Mist palette, with Salmon pink
+reserved for urgency call-outs only. Type stack uses Georgia + Segoe UI
+(the brand-approved alternatives for internal tools where Ivy Mode/Epic
+aren't licensed).

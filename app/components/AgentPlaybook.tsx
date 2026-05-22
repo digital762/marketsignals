@@ -1,18 +1,17 @@
 import { MessageSquareQuote } from "lucide-react";
-import type { Keyword } from "@/lib/types";
+import type { Keyword, SignalProfile } from "@/lib/types";
 import {
+  biggestYoYMover,
+  filterByProfile,
   formatPct,
   formatVolume,
-  maxMoMInBasket,
-  monthsSincePeak,
-  quarterOverQuarter,
-  trendShape,
+  periodComparison,
 } from "@/lib/analytics";
 
 interface AgentPlaybookProps {
-  priceSensitive: Keyword[];
-  transactional: Keyword[];
-  mortgageGroup: Keyword[];
+  keywords: Keyword[];
+  /** Restrict to a specific profile's talking points. */
+  profile?: SignalProfile;
 }
 
 interface TalkingPoint {
@@ -22,95 +21,118 @@ interface TalkingPoint {
   proof: string;
 }
 
-function build(
-  priceSensitive: Keyword[],
-  transactional: Keyword[],
-  mortgageGroup: Keyword[],
-): TalkingPoint[] {
+function buildOverview(keywords: Keyword[]): TalkingPoint[] {
   const out: TalkingPoint[] = [];
 
-  const best = maxMoMInBasket(priceSensitive);
-  if (best) {
+  // Cross-market headline mover
+  const mover = biggestYoYMover(keywords, "jan-feb");
+  if (mover) {
+    const c = mover.comparison;
     out.push({
-      scenario: "Customer hesitant — 'I'm waiting for prices to drop'",
-      customerSays:
-        "I keep reading that Dubai prices are dropping. I'll wait six months.",
+      scenario: "Customer is hesitant — wants to wait",
+      customerSays: "Maybe I'll wait a few months. The market feels slow.",
       agentResponds:
-        "I totally get that — and the data agrees with you, partly. Right now searches for terms like \"" +
-        best.keyword.phrase +
-        "\" jumped " +
-        formatPct(best.pct, { signed: true }) +
-        " month-on-month here in UAE, so you're not alone in looking. But here's the thing — every other serious buyer is doing the same search, so the inventory at a fair correction is moving fast. Let me show you three units that already reflect a real price adjustment.",
-      proof:
-        '"' +
-        best.keyword.phrase +
-        '" — ' +
-        formatPct(best.pct, { signed: true }) +
-        " MoM uplift · UAE",
+        `Searches for "${mover.keyword.phrase}" in Jan-Feb this year were ` +
+        `${formatVolume(c.currentAvg)} a month, vs ${formatVolume(c.priorAvg)} ` +
+        `the same time last year — that's ${formatPct(c.changePct, { signed: true })} more ` +
+        `buyers looking for exactly what you're considering. Every month of waiting is ` +
+        `competition you can't see yet.`,
+      proof: `"${mover.keyword.phrase}" — Jan-Feb 2025: ${formatVolume(c.priorAvg)} → 2026: ${formatVolume(c.currentAvg)} (${formatPct(c.changePct, { signed: true })})`,
     });
   }
 
-  const topBuy = [...transactional].sort((a, b) => b.volume - a.volume)[0];
+  // Buyer side reassurance
+  const buyerKws = filterByProfile(keywords, "buyer");
+  const topBuy = [...buyerKws].sort((a, b) =>
+    periodComparison(b, "may").currentAvg - periodComparison(a, "may").currentAvg,
+  )[0];
   if (topBuy) {
-    const shape = trendShape(topBuy.trend);
-    const recencyNote = shape === "surging" ? "and surging right now" : "consistent each month";
+    const m = periodComparison(topBuy, "may");
     out.push({
-      scenario: "Customer testing if you understand the market",
-      customerSays: "Is the market actually active? Feels quiet to me.",
+      scenario: "Customer thinks the market is quiet",
+      customerSays: "Is anyone actually buying? Feels quiet to me.",
       agentResponds:
-        formatVolume(topBuy.volume) +
-        " people in UAE searched \"" +
-        topBuy.phrase +
-        '" last month alone — ' +
-        recencyNote +
-        ". That's the pool you'd be competing with on any listing you like. If quiet meant low interest, this number would have collapsed. It hasn't.",
-      proof:
-        '"' + topBuy.phrase + '" — ' + formatVolume(topBuy.volume) + " /mo searches",
+        `${formatVolume(m.currentAvg)} people in UAE searched "${topBuy.phrase}" in May alone. ` +
+        `That's the pool you're competing with on any listing you like. If it were quiet ` +
+        `this number would have collapsed. It hasn't.`,
+      proof: `"${topBuy.phrase}" — ${formatVolume(m.currentAvg)} searches in May 2026`,
     });
   }
 
-  const mortgageKeywords = mortgageGroup.filter((k) =>
-    k.group?.toLowerCase().includes("mortgage"),
-  );
-  const mortgageRates = mortgageKeywords.find((k) =>
-    k.phrase.includes("rates"),
-  );
-  if (mortgageRates) {
-    const sincePeak = monthsSincePeak(mortgageRates.trend);
-    const qoq = quarterOverQuarter(mortgageRates.trend);
-    const trajectory = qoq < -0.15 ? "easing" : qoq > 0.15 ? "climbing" : "steady";
+  // Investor side
+  const investorKws = filterByProfile(keywords, "investor");
+  const offPlan = investorKws.find((k) => k.phrase === "off plan dubai");
+  if (offPlan) {
+    const c = periodComparison(offPlan, "jan-feb");
     out.push({
-      scenario: "Customer worried about financing cost",
-      customerSays: "Interest rates make me nervous. Should I wait?",
+      scenario: "Investor asking about off-plan timing",
+      customerSays: "Is off-plan still where the action is?",
       agentResponds:
-        "Search interest in \"dubai mortgage rates\" peaked about " +
-        sincePeak +
-        " months ago and has been " +
-        trajectory +
-        " since (" +
-        formatPct(qoq, { signed: true }) +
-        " over the last quarter). When peer anxiety about rates is past its peak, that's usually the window where motivated sellers are still pricing as if the anxiety is current — exactly when buyers like you get the cleanest deals.",
-      proof:
-        '"dubai mortgage rates" — peaked ' +
-        sincePeak +
-        " mo ago, " +
-        formatPct(qoq, { signed: true }) +
-        " QoQ",
+        `"Off plan dubai" searches in Jan-Feb 2025 averaged ${formatVolume(c.priorAvg)}/month, ` +
+        `and Jan-Feb 2026 came in at ${formatVolume(c.currentAvg)}/month (${formatPct(c.changePct, { signed: true })}). ` +
+        `${c.changePct >= 0 ? "Investor interest is holding up — meaning developer pricing is still anchored to high demand." : "Interest has cooled — meaning developers are more open to negotiation than the headlines suggest. Good window."}`,
+      proof: `"off plan dubai" — Jan-Feb 25: ${formatVolume(c.priorAvg)} → 26: ${formatVolume(c.currentAvg)} (${formatPct(c.changePct, { signed: true })})`,
     });
   }
 
   return out;
 }
 
-export function AgentPlaybook({
-  priceSensitive,
-  transactional,
-  mortgageGroup,
-}: AgentPlaybookProps) {
-  const points = build(priceSensitive, transactional, mortgageGroup);
+function buildForProfile(profile: SignalProfile, keywords: Keyword[]): TalkingPoint[] {
+  const profileKws = filterByProfile(keywords, profile);
+  const out: TalkingPoint[] = [];
+
+  // Biggest mover in this profile
+  const mover = biggestYoYMover(profileKws, "jan-feb");
+  if (mover) {
+    const c = mover.comparison;
+    const direction = c.changePct >= 0.05 ? "growing" : c.changePct <= -0.05 ? "cooling" : "steady";
+    out.push({
+      scenario: `${profile === "renter" ? "Renter" : profile === "buyer" ? "Buyer" : profile === "investor" ? "Investor" : profile === "seller" ? "Seller" : "Landlord"} asks about timing`,
+      customerSays:
+        profile === "renter"
+          ? "Should I lock in now or wait for new options?"
+          : profile === "seller"
+            ? "Is it a good time to list?"
+            : profile === "landlord"
+              ? "Is now the right time to put my unit on the rental market?"
+              : "Is the market right for what I want?",
+      agentResponds:
+        `${direction === "growing" ? `Demand is ${direction} — ` : ""}` +
+        `"${mover.keyword.phrase}" was searched ${formatVolume(c.priorAvg)}/mo in Jan-Feb last year, ` +
+        `and ${formatVolume(c.currentAvg)}/mo this year. ` +
+        `That's a ${formatPct(c.changePct, { signed: true })} year-on-year shift. ` +
+        `${direction === "growing" ? "Acting sooner means less competition." : direction === "cooling" ? "It's a buyer-friendly moment — sellers are more flexible." : "Demand is steady — fewer surprises."}`,
+      proof: `"${mover.keyword.phrase}" — Jan-Feb 25: ${formatVolume(c.priorAvg)} → 26: ${formatVolume(c.currentAvg)}`,
+    });
+  }
+
+  // Latest-month signal
+  const topByVolume = [...profileKws].sort(
+    (a, b) => periodComparison(b, "may").currentAvg - periodComparison(a, "may").currentAvg,
+  )[0];
+  if (topByVolume) {
+    const m = periodComparison(topByVolume, "may");
+    out.push({
+      scenario: "Customer wants proof the market is active",
+      customerSays: "Show me something that says people care about this segment.",
+      agentResponds:
+        `In May alone, ${formatVolume(m.currentAvg)} people in UAE searched "${topByVolume.phrase}". ` +
+        `That's a live audience — not historical noise. Compared to May 2025 (${formatVolume(m.priorAvg)}), ` +
+        `that's ${formatPct(m.changePct, { signed: true })}.`,
+      proof: `"${topByVolume.phrase}" — May 2026: ${formatVolume(m.currentAvg)} searches`,
+    });
+  }
+
+  return out;
+}
+
+export function AgentPlaybook({ keywords, profile }: AgentPlaybookProps) {
+  const points = profile ? buildForProfile(profile, keywords) : buildOverview(keywords);
+  if (!points.length) return null;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div className={`grid grid-cols-1 ${points.length > 2 ? "lg:grid-cols-3" : "lg:grid-cols-2"} gap-4`}>
       {points.map((p, i) => (
         <div key={i} className="card flex flex-col gap-4">
           <div className="flex items-center gap-2">
@@ -121,36 +143,34 @@ export function AgentPlaybook({
               Scenario
             </div>
           </div>
-          <div>
-            <div className="font-serif text-[18px] leading-snug text-slate font-medium">
-              {p.scenario}
-            </div>
+          <div className="font-serif text-[18px] leading-snug text-slate font-medium">
+            {p.scenario}
           </div>
 
           <div className="flex-1 space-y-3">
-            <div className="text-sm">
-              <div className="text-[11px] uppercase tracking-wider text-slate-faint mb-1 font-semibold">
+            <div>
+              <div className="text-[10px] uppercase tracking-wider text-slate-faint mb-1 font-semibold">
                 Customer says
               </div>
-              <div className="text-slate-soft italic leading-relaxed">
+              <div className="text-sm text-slate-soft italic leading-relaxed">
                 &ldquo;{p.customerSays}&rdquo;
               </div>
             </div>
 
-            <div className="text-sm">
-              <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-denim mb-1 font-semibold">
-                <MessageSquareQuote size={12} strokeWidth={2.25} />
+            <div>
+              <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-denim mb-1 font-semibold">
+                <MessageSquareQuote size={11} strokeWidth={2.25} />
                 Agent responds
               </div>
-              <div className="text-slate leading-relaxed">{p.agentResponds}</div>
+              <div className="text-sm text-slate leading-relaxed">{p.agentResponds}</div>
             </div>
           </div>
 
           <div className="pt-3 border-t border-mist-200">
-            <div className="text-[11px] uppercase tracking-wider text-slate-faint mb-1 font-semibold">
+            <div className="text-[10px] uppercase tracking-wider text-slate-faint mb-1 font-semibold">
               Backed by
             </div>
-            <div className="text-[12px] font-medium text-slate-soft">{p.proof}</div>
+            <div className="text-[11px] font-medium text-slate-soft">{p.proof}</div>
           </div>
         </div>
       ))}
